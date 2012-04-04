@@ -14,7 +14,7 @@ import weka.core.Instances;
  * @author Miltiadis Allamanis
  * 
  */
-public final class DatasetWritter {
+public final class DatasetWriter {
 
 	/**
 	 * Write a dataset to a .arff file
