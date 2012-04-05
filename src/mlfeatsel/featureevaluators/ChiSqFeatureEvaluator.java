@@ -15,6 +15,28 @@ import weka.core.Instances;
  */
 public class ChiSqFeatureEvaluator implements IFeatureEvaluator {
 
+	/**
+	 * Cut terms with freq. less than this number.
+	 */
+	private final int cutoffThreshold;
+
+	/**
+	 * Default constructor.
+	 */
+	public ChiSqFeatureEvaluator() {
+		cutoffThreshold = 0;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param cutoff
+	 *            the least possible feature frequency, before cutoff
+	 */
+	public ChiSqFeatureEvaluator(int cutoff) {
+		cutoffThreshold = cutoff;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -58,10 +80,12 @@ public class ChiSqFeatureEvaluator implements IFeatureEvaluator {
 
 		}
 
+		if (A < this.cutoffThreshold)
+			return 0;
+
 		double nominator = N * Math.pow((A * D) - (C * B), 2);
 		double denominator = (A + C) * (B + D) * (A + B) * (C + D);
 
 		return nominator / denominator;
 	}
-
 }
