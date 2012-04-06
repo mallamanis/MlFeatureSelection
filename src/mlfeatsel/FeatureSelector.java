@@ -39,6 +39,14 @@ public class FeatureSelector {
 	}
 
 	/**
+	 * 
+	 * @return the total number of attributes in the initial dataset
+	 */
+	public final int getNumberOfAttributes() {
+		return evals.length;
+	}
+
+	/**
 	 * Select features from the inital dataset
 	 * 
 	 * @param numOfFeaturesToRemain
