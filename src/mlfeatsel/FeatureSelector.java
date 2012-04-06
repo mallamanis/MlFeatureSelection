@@ -39,14 +39,30 @@ public class FeatureSelector {
 	}
 
 	/**
-	 * Select features given a policy
+	 * Select features from the inital dataset
 	 * 
 	 * @param numOfFeaturesToRemain
+	 *            the number of features to keep
 	 * @return a MultiLabelInstances with the selected features
 	 * @throws Exception
 	 */
 	public MultiLabelInstances selectFeatures(int numOfFeaturesToRemain)
 			throws Exception {
+		return this.selectFeatures(numOfFeaturesToRemain, this.dataset);
+	}
+
+	/**
+	 * Select features given a policy from a dataset
+	 * 
+	 * @param numOfFeaturesToRemain
+	 *            the number of features to keep
+	 * @param initialDataset
+	 *            the dataset to select the features from
+	 * @return a MultiLabelInstances with the selected features
+	 * @throws Exception
+	 */
+	public MultiLabelInstances selectFeatures(int numOfFeaturesToRemain,
+			MultiLabelInstances initialDataset) throws Exception {
 
 		// Get evaluation threshold
 		final double[] sorted = Arrays.copyOf(evals, evals.length);
@@ -63,7 +79,7 @@ public class FeatureSelector {
 			}
 		}
 
-		return this.removeFeatures(attrsToRemove);
+		return this.removeFeatures(attrsToRemove, initialDataset);
 
 	}
 
@@ -72,12 +88,15 @@ public class FeatureSelector {
 	 * 
 	 * @param indicesToRemove
 	 *            the list of features indices to remove
+	 * @param initialDataset
+	 *            the dataset to remove the features from
 	 * @return the MultiLabelInstances after feature removal
 	 * @throws InvalidDataFormatException
 	 */
-	protected MultiLabelInstances removeFeatures(int[] indicesToRemove)
+	protected MultiLabelInstances removeFeatures(int[] indicesToRemove,
+			MultiLabelInstances initialDataset)
 			throws InvalidDataFormatException {
-		MultiLabelInstances resultingDset = dataset.clone();
+		MultiLabelInstances resultingDset = initialDataset.clone();
 		final Instances dset = resultingDset.getDataSet();
 		Arrays.sort(indicesToRemove);
 		for (int i = indicesToRemove.length - 1; i >= 0; i--)
