@@ -3,6 +3,7 @@
  */
 package mlfeatsel;
 
+import mulan.data.MultiLabelInstances;
 import weka.core.Instances;
 
 /**
@@ -11,7 +12,8 @@ import weka.core.Instances;
  * @author Miltiadis Allamanis
  * 
  */
-public abstract class AbstractPerLabelAttributeEvaluator implements IDatasetFeatureEvaluator {
+public abstract class AbstractPerLabelAttributeEvaluator implements
+		IDatasetFeatureEvaluator {
 
 	private final IFeatureEvaluator baseAttributeEvaluator;
 
@@ -29,19 +31,13 @@ public abstract class AbstractPerLabelAttributeEvaluator implements IDatasetFeat
 		this.baseAttributeEvaluator = baseEvaluator;
 	}
 
-	/* (non-Javadoc)
-	 * @see mlfeatsel.IDatasetFeatureEvaluator#evaluateAttributes()
-	 */
-	@Override
-	public abstract double[] evaluateAttributes() throws Exception;
-
 	/**
 	 * Evaluate all attributes to all labels.
 	 * 
 	 * @return a matrix containing attributes x labels evaluation
 	 * @throws Exception
 	 */
-	protected double[][] evaluateAll2AllAttributes() throws Exception {
+	public double[][] evaluateAll2AllAttributes() throws Exception {
 		final int numOfLabels = dataset.getNumberOfLabels();
 		final int numOfAttributes = dataset.getNumberOfAttributes();
 		double[][] evaluations = new double[numOfAttributes][numOfLabels];
@@ -55,5 +51,17 @@ public abstract class AbstractPerLabelAttributeEvaluator implements IDatasetFeat
 		}
 
 		return evaluations;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see mlfeatsel.IDatasetFeatureEvaluator#evaluateAttributes()
+	 */
+	@Override
+	public abstract double[] evaluateAttributes() throws Exception;
+
+	public MultiLabelInstances getDataset() {
+		return dataset.getDataset();
 	}
 }
