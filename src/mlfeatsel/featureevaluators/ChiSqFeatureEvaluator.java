@@ -83,7 +83,7 @@ public class ChiSqFeatureEvaluator implements IFeatureEvaluator {
 		if (A < this.cutoffThreshold)
 			return 0;
 
-		double nominator = N * Math.pow((A * D) - (C * B), 2);
+		double nominator = Math.pow((A * D) - (C * B), 2);
 		double denominator = (A + C) * (B + D) * (A + B) * (C + D);
 
 		return nominator / denominator;
