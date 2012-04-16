@@ -5,7 +5,7 @@ package mlfeatsel.experiments;
 
 import mlfeatsel.FeatureSelector;
 import mulan.data.MultiLabelInstances;
-import mulan.evaluation.Evaluation;
+import mulan.evaluation.MultipleEvaluation;
 
 /**
  * Explore the performance of a classifier for different Feature Selections
@@ -30,7 +30,7 @@ public class PerformanceExplorator {
 		 *            set
 		 * @return a Mulan Evaluation describing the results
 		 */
-		public abstract Evaluation getEvaluationFor(
+		public abstract MultipleEvaluation getEvaluationFor(
 				ConcreteFeatureSelector selector);
 
 	}
@@ -95,7 +95,7 @@ public class PerformanceExplorator {
 	/**
 	 * The classifier to be used for exloration.
 	 */
-	private final ClassifierEvaluation classifier;
+	private ClassifierEvaluation classifier;
 
 	/**
 	 * Constructor
@@ -105,10 +105,8 @@ public class PerformanceExplorator {
 	 * @param evalClassifier
 	 *            the classifier to be used for evaluation
 	 */
-	public PerformanceExplorator(ClassifierEvaluation evalClassifier,
-			FeatureSelector selector) {
+	public PerformanceExplorator(FeatureSelector selector) {
 		this.featureSelector = selector;
-		this.classifier = evalClassifier;
 	}
 
 	/**
@@ -119,8 +117,8 @@ public class PerformanceExplorator {
 	 * @return a Mulan Evaluation[] with the evaluation for the given
 	 *         percentages
 	 */
-	public Evaluation[] explorePerformanceFor(double[] percentages) {
-		Evaluation[] results = new Evaluation[percentages.length];
+	public MultipleEvaluation[] explorePerformanceFor(double[] percentages) {
+		MultipleEvaluation[] results = new MultipleEvaluation[percentages.length];
 		for (int i = 0; i < percentages.length; i++) {
 			final int featureSetSize = (int) (featureSelector
 					.getNumberOfAttributes() * percentages[i]);
@@ -130,5 +128,14 @@ public class PerformanceExplorator {
 		}
 
 		return results;
+	}
+
+	/**
+	 * Set the classifier evaluator.
+	 * 
+	 * @param classifierEvaluation
+	 */
+	public void setClassifierEvaluator(ClassifierEvaluation classifierEvaluation) {
+		this.classifier = classifierEvaluation;
 	}
 }
