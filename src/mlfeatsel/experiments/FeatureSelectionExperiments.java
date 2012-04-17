@@ -15,6 +15,8 @@ import mulan.classifier.lazy.MLkNN;
 import mulan.classifier.meta.RAkEL;
 import mulan.classifier.transformation.BinaryRelevance;
 import mulan.classifier.transformation.LabelPowerset;
+import mulan.data.InvalidDataFormatException;
+import mulan.data.MultiLabelInstances;
 import mulan.evaluation.Evaluator;
 import mulan.evaluation.MultipleEvaluation;
 import weka.classifiers.functions.SMO;
@@ -59,8 +61,13 @@ public class FeatureSelectionExperiments {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		FeatureSelectionExperiments experiment;
+		if (args.length == 1)
+			experiment = new FeatureSelectionExperiments(args[0]);
+		else
+			experiment = new FeatureSelectionExperiments(args[0],
+					args[1].equals("test"));
 
-		FeatureSelectionExperiments a = new FeatureSelectionExperiments(args[0]);
 		String csv = "";
 		// Current time
 		long start = 0;
@@ -69,9 +76,9 @@ public class FeatureSelectionExperiments {
 
 		for (int i = 0; i < 10; i++) {
 			start = System.currentTimeMillis();
-			MultipleEvaluation[] eval = a
-					.perLabelFeatureSelection(new RAkEL(new LabelPowerset(
-							new J48())), new ChiSqFeatureEvaluator(i));
+			MultipleEvaluation[] eval = experiment.perLabelFeatureSelection(
+					new RAkEL(new LabelPowerset(new J48())),
+					new ChiSqFeatureEvaluator(i));
 			elapsedTimeMillis = System.currentTimeMillis() - start;
 			String[] pr1 = { "RAkEL-J48", Integer.toString(i),
 					Long.toString(elapsedTimeMillis) };
@@ -79,8 +86,9 @@ public class FeatureSelectionExperiments {
 			csv += stringToCsv(evalArray);
 
 			start = System.currentTimeMillis();
-			eval = a.perLabelFeatureSelection(new RAkEL(new LabelPowerset(
-					new SMO())), new ChiSqFeatureEvaluator(i));
+			eval = experiment
+					.perLabelFeatureSelection(new RAkEL(new LabelPowerset(
+							new SMO())), new ChiSqFeatureEvaluator(i));
 			elapsedTimeMillis = System.currentTimeMillis() - start;
 			String[] pr2 = { "RAkEL-SMO", Integer.toString(i),
 					Long.toString(elapsedTimeMillis) };
@@ -88,7 +96,7 @@ public class FeatureSelectionExperiments {
 			csv += stringToCsv(evalArray);
 
 			start = System.currentTimeMillis();
-			eval = a.perLabelFeatureSelection(new MLkNN(),
+			eval = experiment.perLabelFeatureSelection(new MLkNN(),
 					new ChiSqFeatureEvaluator(i));
 			elapsedTimeMillis = System.currentTimeMillis() - start;
 			String[] pr3 = { "MlKnn", Integer.toString(i),
@@ -97,8 +105,8 @@ public class FeatureSelectionExperiments {
 			csv += stringToCsv(evalArray);
 
 			start = System.currentTimeMillis();
-			eval = a.perLabelFeatureSelection(new BinaryRelevance(new J48()),
-					new ChiSqFeatureEvaluator(i));
+			eval = experiment.perLabelFeatureSelection(new BinaryRelevance(
+					new J48()), new ChiSqFeatureEvaluator(i));
 			elapsedTimeMillis = System.currentTimeMillis() - start;
 			String[] pr4 = { "BRJ48", Integer.toString(i),
 					Long.toString(elapsedTimeMillis) };
@@ -131,14 +139,41 @@ public class FeatureSelectionExperiments {
 
 	private final String xmlFilename;
 
+	private final String testFilename;
+
+	private MultiLabelInstances testSet;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param datasetPrefix
 	 */
-	public FeatureSelectionExperiments(String datasetPrefix) {
+	public FeatureSelectionExperiments(final String datasetPrefix) {
 		arffFilename = datasetPrefix + ".arff";
 		xmlFilename = datasetPrefix + ".xml";
+		testFilename = "";
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param datasetPrefix
+	 * @param hasTestset
+	 */
+	public FeatureSelectionExperiments(String datasetPrefix, boolean hasTestset) {
+		xmlFilename = datasetPrefix + ".xml";
+		if (!hasTestset) {
+			testFilename = "";
+			arffFilename = datasetPrefix + ".arff";
+		} else {
+			testFilename = datasetPrefix + "-test.arff";
+			arffFilename = datasetPrefix + "-train.arff";
+			try {
+				testSet = new MultiLabelInstances(testFilename, xmlFilename);
+			} catch (InvalidDataFormatException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -168,9 +203,18 @@ public class FeatureSelectionExperiments {
 					ConcreteFeatureSelector selector) {
 				Evaluator eval = new Evaluator();
 				try {
-					return eval.crossValidate(learner,
-							selector.featureSelect(lblPresenter.getDataset()),
-							10);
+					if (testFilename == "") {
+						return eval.crossValidate(learner, selector
+								.featureSelect(lblPresenter.getDataset()), 10);
+					}
+					learner.build(selector.featureSelect(lblPresenter
+							.getDataset()));
+
+					MultipleEvaluation result = new MultipleEvaluation();
+					result.addEvaluation(eval.evaluate(learner,
+							selector.featureSelect(testSet)));
+					return result;
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
