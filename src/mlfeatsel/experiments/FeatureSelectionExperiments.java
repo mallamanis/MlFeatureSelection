@@ -74,7 +74,7 @@ public class FeatureSelectionExperiments {
 		// Elapsed time in milliseconds
 		long elapsedTimeMillis = 0;
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i += 2) {
 			start = System.currentTimeMillis();
 			MultipleEvaluation[] eval = experiment.perLabelFeatureSelection(
 					new RAkEL(new LabelPowerset(new J48())),
@@ -213,6 +213,7 @@ public class FeatureSelectionExperiments {
 					MultipleEvaluation result = new MultipleEvaluation();
 					result.addEvaluation(eval.evaluate(learner,
 							selector.featureSelect(testSet)));
+					result.calculateStatistics();
 					return result;
 
 				} catch (Exception e) {
